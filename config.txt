@@ -1,0 +1,29 @@
+# Delimiter:
+#  tab (newline after each reptition)
+#  newline (no newline, use blank field instead)
+#
+# Block order:
+#   from_top
+#   from_bottom
+#   oldest_first
+#   newest_first
+#   custom (specify one by one at runtime)
+#
+# Repetition order:
+#   oldest_first
+#   newest_first
+#
+# Ignore sentences: true/false
+#
+# Field order:
+#   0 - blank field
+#   1 - polish translation
+#   2 - english phrase
+#   3 - synonyms
+#   4 - note
+
+delimiter=tab
+block_order=custom
+repetition_order=oldest_first
+ignore_sentences=false
+field_order=1,4,2,3
