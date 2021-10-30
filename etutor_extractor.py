@@ -2,15 +2,14 @@ from getpass import getpass
 from bs4 import BeautifulSoup
 import requests
 from requests.exceptions import ReadTimeout
-from time import sleep
 
 LOGIN_URL = 'https://www.etutor.pl/account/login'
 REPETITIONS_URL = 'https://www.etutor.pl/words/user-words'
 REPETITION_BLOCKS_URL = 'https://www.etutor.pl/words/user-words-editor-preview/'
-
 USER_AGENT = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64;rv:89.0)Gecko/20100101 Firefox/90.0'
 }
+
 
 def get_custom_hrefs(href_names):
     print('Wybierz bloki do przetworzenia:\n'
@@ -80,16 +79,17 @@ def main():
     if 'Zaloguj się - eTutor' in response.text:
         print('Logowanie nie powiodło się\n'
               'Nieprawidłowa nazwa użytkownika lub hasło')
-        sleep(2)
+        import time
+        time.sleep(2.5)
         return None
 
     print('Zalogowano pomyślnie\n')
     print('Pozyskuję bloki z powtórkami...')
     response = ses.get(REPETITIONS_URL, timeout=10)
     soup = BeautifulSoup(response.text, 'lxml')
-    href_data = soup.find_all('a', class_='listName')
 
-    hrefs = [h['href'].rsplit('/', 1)[-1] for h in href_data]
+    hrefs = [h['href'].rsplit('/', 1)[-1]
+             for h in soup.find_all('a', class_='listName')]
 
     block_order = config.get('block_order', 'from_top')
     if block_order.startswith('from_b'):
