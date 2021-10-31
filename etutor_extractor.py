@@ -1,7 +1,6 @@
-from concurrent.futures import ThreadPoolExecutor
 import random
+from concurrent.futures import ThreadPoolExecutor
 from getpass import getpass
-from typing import NamedTuple
 
 import requests
 from bs4 import BeautifulSoup
@@ -43,21 +42,16 @@ class ProgressBar:
         print(f'{self.message}  [{bar}]\r', end='')
 
 
-class RepetitionBlock(NamedTuple):
-    soup: BeautifulSoup
-    href: str
-
-
 def download_blocks(session, progress):
     def downloaded(href):
         session.headers.update({'User-Agent': random.choice(USER_AGENTS)})
         response = session.get(REPETITION_BLOCKS_URL + href, timeout=10)
         if response.status_code == 200:
             progress.advance()
-            return RepetitionBlock(soup=BeautifulSoup(response.text, 'lxml'), href=href)
+            return BeautifulSoup(response.text, 'lxml')
 
         progress.advance('-')
-        return RepetitionBlock(soup=None, href=href)
+        return None
     return downloaded
 
 
@@ -181,15 +175,15 @@ def main():
         open('karty.txt', 'a', encoding='utf-8') as f \
             :
         for block in blocks:
-            if block.soup is None:
+            if block is None:
                 dl_error = True
                 progress.advance('-')
                 continue
 
             if ignore_sentences:
-                repetitions = block.soup.find_all('p', class_='hws phraseEntity')
+                repetitions = block.find_all('p', class_='hws phraseEntity')
             else:
-                repetitions = block.soup.select('p.hws.phraseEntity, div.maintext')
+                repetitions = block.select('p.hws.phraseEntity, div.maintext')
 
             processed = []
             for repetition in repetitions:
