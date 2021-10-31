@@ -9,12 +9,11 @@ Program do szybkiego eksportowania powtórek z serwisu www.etutor.pl.
   `pip install requests beautifulsoup lxml`
 
 ## Użycie
-- Przechodzimy do folderu ze skryptem
+- Przechodzimy do folderu ze skryptem:<br>
+  `cd <ścieżka do folderu>`
 - Możemy zmienić ustawienia eksportowania edytując plik "config.txt"
-- Otwieramy za pomocą Pythona:<br>
+- Następnie otwieramy skrypt za pomocą Pythona:<br>
   `python etutor_extractor.py` lub `python3 etutor_extractor.py`
-- Logujemy się do eTutora
-- Pobrane powtórki zapisane zostaną do pliku "karty.txt"
 
 ## Dlaczego?
-eTutor jest serwisem płatnym, który w dużej części opiera swoje działanie na dodawaniu powtórek ze słownika diki.pl.  Mając to na uwadze, serwis nie udostępnia użytkownikowi łatwo dostępnej opcji eksportowania dodanych powtórek - opcja ta miałaby wymiar czysto praktyczny, jako iż większość informacji o powtórkach jest dostępna dla użytkownika.
+eTutor jest serwisem płatnym, który w dużej części opiera swoje działanie na dodawaniu przez użytkownika powtórek ze słownika diki.pl.  Mając to na uwadze, serwis nie udostępnia użytkownikowi prostej opcji eksportowania dodanych powtórek - opcja ta miałaby wymiar czysto praktyczny, jako iż większość informacji o powtórkach jest dostępna dla użytkownika.
