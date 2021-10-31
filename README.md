@@ -6,7 +6,7 @@ Program do szybkiego eksportowania powtórek z serwisu www.etutor.pl.
 - Rozpakowujemy
 - Instalujemy Pythona >= 3.7 (https://www.python.org/downloads/)
 - Otwieramy terminal i instalujemy wymagane biblioteki:<br>
-  `pip install requests beautifulsoup lxml`
+  `pip install requests beautifulsoup4 lxml`
 
 ## Użycie
 - Przechodzimy do folderu ze skryptem:<br>
