@@ -21,9 +21,15 @@
 #   2 - english phrase
 #   3 - synonyms
 #   4 - note
+#
+# Max workers:
+#   number of threads used for downloading blocks of repetitions
+#   (more threads = faster downloads, less stable)
+#   (do not use more than 6)
 
 delimiter=tab
-block_order=custom
-repetition_order=oldest_first
+block_order=newest_first
+repetition_order=newest_first
 ignore_sentences=false
-field_order=1,4,2,3
+field_order=1,2,3,4
+max_workers=4
