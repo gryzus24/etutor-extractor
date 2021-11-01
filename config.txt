@@ -1,6 +1,6 @@
 # Delimiter:
-#  tab (newline after each reptition)
-#  newline (no newline, use blank field instead)
+#  tab (fields separated by tab, repetitions by newline)
+#  newline (fields and repetitions separated by newline)
 #
 # Block order:
 #   from_top
@@ -24,7 +24,7 @@
 #
 # Max workers:
 #   number of threads used for downloading blocks of repetitions
-#   (more threads = faster downloads, less stable)
+#   (more threads = faster download)
 #   (do not use more than 6)
 
 delimiter=tab
