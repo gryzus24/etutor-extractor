@@ -62,16 +62,8 @@ def get_custom_hrefs(href_names):
         print(f'{str(index):4s}{hname}')
     print()
 
-    choices = [int(x)
-               for x in input('#: ').split(',')
-               if x.strip().isnumeric()]
-
-    hrefs = []
-    for ch in choices:
-        if 0 < ch <= len(href_names):
-            href = href_names[ch-1][0]
-            hrefs.append(href)
-    return hrefs
+    choices = [int(x) for x in input('#: ').split(',') if x.strip().isnumeric()]
+    return [href_names[x-1][0] for x in choices if 0 < x <= len(href_names)]
 
 
 def print_config(config):
