@@ -2,7 +2,7 @@
 Program do szybkiego eksportowania powtórek z serwisu www.etutor.pl.
 
 ## Instalacja
-- Pobieramy .zip (Windows) lub .tar.gz (Posix)
+- Pobieramy .zip lub .tar.gz
 - Rozpakowujemy
 - Instalujemy Pythona >= 3.7 (https://www.python.org/downloads/)
 - Otwieramy terminal i instalujemy wymagane biblioteki:<br>
