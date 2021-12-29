@@ -62,7 +62,7 @@ def get_custom_hrefs(href_names):
         print(f'{str(index):4s}{hname}')
     print()
 
-    choices = [int(x) for x in input('#: ').split(',') if x.strip().isnumeric()]
+    choices = [int(x.strip()) for x in input('#: ').split(',') if x.strip().isnumeric()]
     return [href_names[x-1][0] for x in choices if 0 < x <= len(href_names)]
 
 
@@ -79,12 +79,11 @@ def load_config():
     except FileNotFoundError:
         print('==> Brak pliku konfiguracyjnego.')
         return {
-            'block_order': 'newest_first',
+            'block_order': 'new_first',
             'delimiter': 'tab',
-            'field_order': '1,2,3,4',
-            'ignore_sentences': 'false',
+            'field_order': '1,2,3,4,5,6',
             'max_workers': '4',
-            'repetition_order': 'newest_first'
+            'repetition_order': 'new_first'
         }
 
     key_val = []
@@ -149,59 +148,92 @@ def main():
 
     connector = '\t' if config['delimiter'] == 'tab' else '\n'
     new_first = config['repetition_order'].startswith('new')
-    ignore_sentences = config['ignore_sentences'] == 'true'
     field_order = config['field_order'].split(',')
     no_of_hrefs = len(hrefs)
+    try:
+        max_workers = int(config['max_workers'])
+    except ValueError:
+        max_workers = 4
+    else:
+        # eTutor doesn't tolerate more than 6 workers, using 4 as default just to be safe
+        if max_workers > 6 or max_workers < 1:
+            max_workers = 4
 
-    # eTutor doesn't tolerate more than 6 workers, using 4 as default just to be safe
     with \
-        ProgressBar('Pobieram powtórki     ', no_of_hrefs) as progress, \
-        ThreadPoolExecutor(max_workers=int(config['max_workers'])) as executor \
-            :
+    ProgressBar('Pobieram powtórki     ', no_of_hrefs) as progress, \
+    ThreadPoolExecutor(max_workers=max_workers) as executor:
         dl_func = download_blocks(ses, progress)
         blocks = executor.map(dl_func, hrefs)
 
-    dl_error = False
     with \
-        ProgressBar('Przetwarzam i zapisuję', no_of_hrefs) as progress, \
-        open('karty.txt', 'a', encoding='utf-8') as f \
-            :
+    ProgressBar('Przetwarzam i zapisuję', no_of_hrefs) as progress, \
+    open('karty.txt', 'a', encoding='utf-8') as f:
         for block in blocks:
-            if block is None:
-                dl_error = True
-                progress.advance('-')
-                continue
-
-            if ignore_sentences:
-                repetitions = block.find_all('p', class_='hws phraseEntity')
-            else:
-                repetitions = block.select('p.hws.phraseEntity, div.maintext')
-
             processed = []
-            for repetition in repetitions:
-                # processing with split and replace is much
-                # more efficient than using bs4 find methods
-                extract = repetition.text.strip()[:-11].replace('\n', '')
+            relevant = block.find('div', class_='learningcontents')
+            for repetition in relevant.find_all('div', recursive=False):
+                extract = repetition.text.strip().replace('\n', '')
 
-                phrase = extract.split('=', 1)[0].strip(', ').replace(' , ', ', ')
-                translation = extract.split('=', 1)[-1].split('\xa0', 1)[0]
+                phrase, translation = extract.split('=', 1)
+                phrase = phrase.strip(', ')\
+                    .replace(' , ', ', ')\
+                    .replace('\xa0', ' ')\
+                    .replace('British English', '[British]')\
+                    .replace('American English', '[American]')
+                translation = translation.split('\xa0', 1)[0]\
+                    .replace('British', '[British]')\
+                    .replace('American', '[American]')
 
                 if '\xa0synonym:' in extract:
-                    synonyms = extract.split('\xa0synonym:')[-1].split('\xa0\r')[0]
+                    synonyms = extract.split('\xa0synonym:', 1)[-1].split('\xa0\r', 1)[0]
                 else:
                     synonyms = ''
 
                 if 'Edit the note' in extract:
-                    note = extract.rsplit('Edit the note', 1)[-1]
+                    note = extract.rsplit('Edit the note', 1)[-1].rsplit('SaveCancel', 1)[0]
                 else:
                     note = ''
+
+                etutor_note_raw = repetition.find('div', class_='note', recursive=False)
+                if etutor_note_raw is not None:
+                    etutor_note = etutor_note_raw.text.strip()
+                else:
+                    etutor_note = ''
+
+                phrase_audio_raw = repetition.find('span', class_='audioIcon')
+                if phrase_audio_raw is not None:
+                    phrase_audio = '[sound:https://www.diki.pl' + phrase_audio_raw.get('data-audio-url') + ']'
+                else:
+                    phrase_audio = ''
+
+                image_raw = repetition.find('img', class_='pict', recursive=False)
+                if image_raw is not None:
+                    image = '<img src="https://www.diki.pl' + image_raw.get('src') + '">'
+                else:
+                    image = ''
+
+                examples = []
+                examples_raw = repetition.find('ul', class_='sentencesul', recursive=False)
+                if examples_raw is not None:
+                    for example in examples_raw.find_all('li', recursive=False):
+                        e = example.text.strip()
+                        sep = e[-1]
+                        eng, pl = e.split(sep, 1)
+                        examples.append(f'<li>{eng}{sep}<br>{pl}</li>')
+                    examples = '<ul>' + '<br>'.join(examples) + '</ul>'
+                else:
+                    examples = ''
 
                 data = {'0': '',
                         '1': translation,
                         '2': phrase,
                         '3': synonyms,
-                        '4': note}
-                processed.append(connector.join([data[x].strip() for x in field_order]) + '\n')
+                        '4': note,
+                        '5': etutor_note,
+                        '6': examples,
+                        '7': phrase_audio,
+                        '8': image}
+                processed.append(connector.join(data[x.strip()].strip() for x in field_order) + '\n')
 
             if new_first:
                 f.writelines(processed[::-1])
@@ -210,11 +242,7 @@ def main():
 
             progress.advance()
 
-    if dl_error:
-        print('** Nie udało się pobrać wszystkich powtórek **\n'
-              '** Zmniejsz ilość wątków używanych do pobierania **')
-    else:
-        print('** Zakończono - karty zapisane do pliku "karty.txt" **')
+    print('** Zakończono - karty zapisane do pliku "karty.txt" **')
 
 
 if __name__ == '__main__':

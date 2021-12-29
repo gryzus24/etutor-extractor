@@ -1,35 +1,38 @@
 # Delimiter:
-#  tab (fields separated by tab, repetitions by newline)
-#  newline (fields and repetitions separated by newline)
+#  tab (fields separated by a tab, repetitions by a newline)
+#  newline (fields and repetitions separated by a newline)
 #
 # Block order:
 #   from_top
 #   from_bottom
-#   oldest_first
-#   newest_first
+#   old_first
+#   new_first
 #   custom (specify one by one at runtime)
 #
 # Repetition order:
-#   oldest_first
-#   newest_first
-#
-# Ignore sentences: true/false
+#   old_first
+#   new_first
 #
 # Field order:
 #   0 - blank field
 #   1 - polish translation
 #   2 - english phrase
 #   3 - synonyms
-#   4 - note
+#   4 - user's note
+#   5 - etutor's note
+#   6 - example sentences
+#   7 - *english phrase audio
+#   8 - picture
+#
+# *USE LOCALIZE MEDIA ADD-ON TO PLAY EMBEDDED AUDIO:
+#   https://ankiweb.net/shared/info/1293255374
 #
 # Max workers:
-#   number of threads used for downloading blocks of repetitions
-#   (more threads = faster download)
-#   (do not use more than 6)
+#   number of threads used for downloading blocks of repetitions (1-6)
+#   (use a lower number if something doesn't work)
 
 delimiter=tab
-block_order=newest_first
-repetition_order=newest_first
-ignore_sentences=false
-field_order=1,2,3,4
+block_order=new_first
+repetition_order=new_first
+field_order=1,2,3,4,5,6
 max_workers=4
